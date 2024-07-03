@@ -44,6 +44,11 @@ contract Dex is Ownable {
         address to,
         uint256 amount
     ) public view returns (uint256) {
+        // 10 * 100/ 100
+        // 10
+        // 110 -> 90
+        // 10 * 90 / 110
+
         return ((amount * IERC20(to).balanceOf(address(this))) /
             IERC20(from).balanceOf(address(this)));
     }
